@@ -1,0 +1,51 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+#include "max6675.h"
+
+// LCD settings
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Address 0x27 for a 16 chars and 2 line display
+
+// MAX6675 pins
+int thermoDO = 4;   // SO = Serial Out
+int thermoCS = 5;   // CS = chip select CS pin
+int thermoCLK = 6;  // SCK = Serial Clock pin
+
+MAX6675 thermocouple(thermoCLK, thermoCS, thermoDO);
+
+void setup() {
+  // Initialize LCD
+  lcd.init();
+  lcd.backlight();
+
+  // Initialize Serial communication for debugging
+  Serial.begin(9600);
+  Serial.println("MAX6675 Thermocouple Test");
+
+  // Wait for MAX chip to stabilize
+  delay(500);
+}
+
+void loop() {
+  // Read temperatures from MAX6675
+  float tempC = thermocouple.readCelsius();
+  float tempF = thermocouple.readFahrenheit();
+
+  // Print temperatures to Serial Monitor
+  Serial.print("C = ");
+  Serial.println(tempC);
+  Serial.print("F = ");
+  Serial.println(tempF);
+
+  // Display temperatures on LCD
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Temp: ");
+  lcd.print(tempC);
+  lcd.print((char)223); // Degree symbol
+  lcd.print("C / ");
+  lcd.print(tempF);
+  lcd.print((char)223); // Degree symbol
+  lcd.print("F");
+
+  delay(2000); // Delay for 2 seconds before next reading
+}
